@@ -3,6 +3,7 @@ from streamlit_searchbox import st_searchbox
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
+import os, json
 import yfinance as yf
 import pandas as pd
 import requests
@@ -17,14 +18,79 @@ st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide
 # ----------------------------------------------------
 # 1. LOAD FULL HTML BACKGROUND (HEADER + PANEL + FOOTER)
 # ----------------------------------------------------
-def load_background():
+# load html content
+def load_background_and_position():
     with open("background.html", "r", encoding="utf-8") as f:
         html = f.read()
 
-    # full page UI
-    components.html(html, height=1100, scrolling=False)
+    # render background html in an iframe (height đủ lớn để hiển thị panel)
+    components.html(html, height=1000, scrolling=False)
 
-load_background()
+    # JS: tính vị trí #app trong parent và overlay container Streamlit lên đó
+    # - cập nhật khi window resize / scroll
+    # - cho phép nội dung Streamlit scroll bên trong panel
+    js = r"""
+    <script>
+    (function(){
+        // chạy định kỳ đến khi cả 2 phần tử parent tồn tại
+        const trySetup = setInterval(() => {
+            try {
+                const parentDoc = window.parent.document;
+                const panel = parentDoc.querySelector('#app'); // panel của bạn
+                const streamlitMain = parentDoc.querySelector('[data-testid="stAppViewContainer"]'); // container Streamlit
+
+                if (!panel || !streamlitMain) return;
+
+                // đặt một số style cơ bản cho streamlit container để overlay panel
+                function applyStyles(){
+                    const rect = panel.getBoundingClientRect();
+
+                    // convert rect relative to viewport, we set fixed so it sits visually over panel
+                    streamlitMain.style.position = 'fixed';
+                    streamlitMain.style.left = rect.left + 'px';
+                    streamlitMain.style.top = rect.top + 'px';
+                    streamlitMain.style.width = rect.width + 'px';
+                    streamlitMain.style.height = rect.height + 'px';
+                    streamlitMain.style.overflow = 'auto';
+                    streamlitMain.style.zIndex = 9998;
+                    streamlitMain.style.background = 'transparent'; // let your panel background show
+                    streamlitMain.style.padding = '0';
+                    streamlitMain.style.margin = '0';
+                }
+
+                applyStyles();
+
+                // update on window resize/scroll of parent
+                window.addEventListener('resize', applyStyles);
+                window.addEventListener('orientationchange', applyStyles);
+                // also update every 300ms for a short while to catch layout changes
+                let updates = 0;
+                const updater = setInterval(() => {
+                    applyStyles();
+                    updates++;
+                    if (updates > 30) clearInterval(updater);
+                }, 300);
+
+                // Also observe mutations on parent to adjust if layout changes
+                const obs = new MutationObserver(() => applyStyles());
+                obs.observe(parentDoc.body, { childList: true, subtree: true });
+
+                clearInterval(trySetup);
+            } catch (e) {
+                // cross-origin or not ready yet
+                // keep trying until found or timeout
+                // console.log('waiting for parent elements', e);
+            }
+        }, 250);
+    })();
+    </script>
+    """
+
+    # inject zero-height component with the JS so it runs in the iframe context
+    components.html(js, height=0)
+    
+# call the loader
+load_background_and_position()
 
 # ----------------------------------------------------
 # 2. MOVE STREAMLIT UI INTO <div id="app">
