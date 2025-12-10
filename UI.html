@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>AI Earth Slice Background</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at bottom, #050712, #020617);
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+    color: #00F5FF;
+}
+
+/*  Background */
+.grid {
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    background-image:
+        linear-gradient(rgba(0,245,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.05) 1px, transparent 1px);
+    background-size: 45px 45px;
+    transform: rotateX(65deg);
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    from { transform: translateY(0) rotateX(65deg); }
+    to   { transform: translateY(250px) rotateX(65deg); }
+}
+
+/* Earth */
+.earth-container {
+    position: absolute;
+    width: 420px;
+    height: 220px;
+    overflow: hidden;
+    bottom: 0;
+    right: 0;
+    border-radius: 400px 0 0 0;
+}
+
+.earth {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background:
+        repeating-radial-gradient(circle, rgba(0,245,255,0.2) 0 1px, transparent 2px),
+        repeating-linear-gradient(90deg, rgba(0,245,255,0.15) 0 2px, transparent 4px),
+        radial-gradient(circle at 30% 30%, #00F5FF, #020617 70%);
+    filter: contrast(150%);
+    animation: spin 18s linear infinite;
+}
+
+.earth::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(0,245,255,0.9) 4%, transparent 6%),
+        radial-gradient(circle at 55% 50%, rgba(0,245,255,0.9) 5%, transparent 7%),
+        radial-gradient(circle at 68% 30%, rgba(0,245,255,0.9) 4%, transparent 6%),
+        radial-gradient(circle at 40% 65%, rgba(0,245,255,0.9) 6%, transparent 8%);
+    opacity: 0.9;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* Ánh sáng */
+.earth-glow {
+    position: absolute;
+    width: 420px;
+    height: 220px;
+    border-radius: 0 0 400px 400px;
+    box-shadow: 0 0 80px rgba(0,245,255,0.5);
+}
+
+/* Sóng Radar */
+.radar {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+    border: 2px solid rgba(0,245,255,0.15);
+    border-radius: 50%;
+    bottom: -150px;
+    right: -150px;
+    animation: radar 3s linear infinite;
+}
+
+@keyframes radar {
+    from { opacity: 1; transform: translate(-50%, 10%) scale(0.4); }
+    to   { opacity: 0; transform: translate(-50%, 10%) scale(1.4); }
+}
+
+/* Hạt */
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #00F5FF;
+    box-shadow: 0 0 10px #00F5FF;
+    animation: float 10s linear infinite;
+}
+
+@keyframes float {
+    from { transform: translateY(100vh); }
+    to   { transform: translateY(-10vh); }
+}
+
+/* HUD */
+.hud {
+    position: absolute;
+    font-size: 14px;
+    opacity: 0.85;
+    letter-spacing: 1px;
+}
+
+.hud.left { top: 55%; left: 40px; }
+.hud.right { top: 55%; right: 40px; text-align: right; }
+
+.hud-panel {
+    position: absolute;
+    top: 8%;
+    right: 5%;
+    width: 280px;
+    padding: 18px;
+    backdrop-filter: blur(8px);
+    background: rgba(0, 30, 60, 0.25);
+    border: 1px solid rgba(0, 180, 255, 0.5);
+    border-radius: 14px;
+    box-shadow: 0 0 18px rgba(0, 200, 255, 0.25);
+    overflow: hidden;
+    color: #dff7ff;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.hud-title {
+    font-size: 15px;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #76eaff;
+}
+
+/* Title */
+.center-title {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 26px;
+    letter-spacing: 3px;
+    opacity: 0.4;
+}
+
+/* Scan effect */
+.scan {
+    position: absolute;
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 245, 255, 0.9),
+        transparent
+    );
+    top: 0;
+    animation: scanMove 3s linear infinite;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.8);
+    pointer-events: none;
+}
+
+@keyframes scanMove {
+    from {
+        top: 0;
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 1;
+    }
+    to {
+        top: 100%;
+        opacity: 0.2;
+    }
+}
+
+/* Divider Line */
+.hud-line {
+    width: 100%;
+    height: 1px;
+    margin: 8px 0 12px;
+    background: linear-gradient(to right, #00ffff, transparent);
+}
+
+/* Info text */
+.hud-info p {
+    margin: 4px 0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0.9;
+}
+
+.hud-info .label {
+    color: #57e8ff;
+    font-weight: 500;
+}
+
+/* Scan bar */
+.hud-scan-bar {
+    width: 100%;
+    height: 7px;
+    background: rgba(0, 60, 90, 0.6);
+    border-radius: 4px;
+    margin-top: 14px;
+    overflow: hidden;
+}
+
+.scan-progress {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ffff, #0080ff);
+    border-radius: 4px;
+    animation: scanning 4s infinite linear;
+}
+
+@keyframes scanning {
+    0% { width: 0%; }
+    50% { width: 100%; }
+    100% { width: 0%; }
+}
+
+/* Light sweep across the HUD */
+.light-sweep {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    animation: sweep 4s infinite;
+}
+
+@keyframes sweep {
+    0% { left: -100%; }
+    60% { left: 130%; }
+    100% { left: 130%; }
+}
+
+/* Frosted frame */
+.main-frosted-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    width: 55%;
+    height: 78%;
+
+    /* Fade */
+    background: rgba(0, 20, 40, 0.25);
+    backdrop-filter: blur(12px);
+
+    /* Fade viền */
+    box-shadow: 
+        0 0 80px 40px rgba(0, 180, 255, 0.12),
+        0 0 60px 20px rgba(0, 0, 0, 0.35) inset;
+    
+    border-radius: 20px;
+    overflow: hidden;
+    animation: panelFadeIn 2s ease forwards;
+}
+
+@keyframes panelFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Nội dung bên trong panel */
+.panel-content {
+    color: #ccf6ff;
+    padding: 30px;
+    font-family: "Segoe UI", sans-serif;
+    text-align: center;
+}
+
+.panel-content h2 {
+    margin-bottom: 10px;
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: #7ee7ff;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Navigation Menu -->
+<nav id="navMenu" style="
+    position:fixed;
+    top:0; left:0;
+    width:100%;
+    height:68px;
+    padding:0 32px;
+    background:rgba(0,20,40,0.35);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(0,180,255,0.4);
+    z-index:99999;
+    font-family:'Orbitron',sans-serif;
+    letter-spacing:2px;
+    color:#7ee7ff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition:transform 0.3s ease;
+">
+
+    <!-- Team Name -->
+    <div style="display:flex; align-items:center; gap:16px;">
+        <span id="teamName" onclick="scrollToTop()" 
+            style="cursor:pointer; font-size:18px; font-weight:600;">
+            SONG CHI TIEN QUAN
+        </span>
+    </div>
+
+    <!-- Menu Items -->
+    <div style="display:flex; align-items:center; gap:40px;">
+        <span style="cursor:pointer; font-size:15px;" onclick="scrollToDashboard()">DASHBOARD</span>
+        <span style="cursor:pointer; font-size:15px;" onclick="scrollToContact()">CONTACT</span>
+    </div>
+
+</nav>
+
+
+
+<script>
+/* ----- NAVIGATION HIDE / SHOW ON SCROLL ----- */
+let lastScrollY = window.scrollY;
+let isClickScrolling = false;
+
+window.addEventListener('scroll', () => {
+    if (isClickScrolling) return;
+
+    const nav = document.getElementById('navMenu');
+
+    if (window.scrollY > lastScrollY) {
+        nav.style.transform = "translateY(-80px)";
+    } else {
+        nav.style.transform = "translateY(0)";
+    }
+
+    lastScrollY = window.scrollY;
+});
+
+/* ----- Jump Functions ----- */
+function scrollToDashboard() {
+    isClickScrolling = true;
+    document.querySelector(".center-title").scrollIntoView({ behavior: "smooth" });
+
+    setTimeout(() => {
+        isClickScrolling = false;
+    }, 600); 
+}
+
+function scrollToContact() {
+    isClickScrolling = true;
+    document.getElementById("contactFooter").scrollIntoView({ behavior: "smooth" });
+
+    setTimeout(() => {
+        isClickScrolling = false;
+    }, 600);
+}
+
+function scrollToTop() {
+    isClickScrolling = true;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+    setTimeout(() => { isClickScrolling = false; }, 600);
+}
+</script>
+
+
+<div class="grid"></div>
+
+<div class="earth-container">
+    <div class="earth"></div>
+    <div class="earth-glow"></div>
+    <div class="scan"></div>
+</div>
+
+<div class="radar"></div>
+
+<div class="hud left">
+NODE: ACTIVE<br>
+PACKET: 0.0021ms<br>
+FLOW: STABLE<br>
+AI CORE: ONLINE
+</div>
+
+<div class="hud right">
+GLOBAL LINK: READY<br>
+GRID SYNC: 100%<br>
+SECURITY: MAX<br>
+MARKET: LIVE
+</div>
+
+<div class="center-title">
+AI MINIMUM STOCK EXCHANGE PACKET
+</div>
+
+
+<div class="main-frosted-panel">
+    <div class="panel-content">
+        <h2>Data Processing</h2>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+        <p> Content </p>
+    </div>
+</div>
+
+<script>
+for (let i = 0; i < 90; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.animationDuration = (6 + Math.random() * 10) + "s";
+    document.body.appendChild(p);
+}
+</script>
+
+<!-- Footer Contact -->
+<footer id="contactFooter" style="
+    position:fixed;
+    bottom:0; left:0;
+    width:100%;
+    padding:14px 0;
+    text-align:center;
+    background:rgba(0,20,40,0.45);
+    backdrop-filter:blur(10px);
+    border-top:1px solid rgba(0,180,255,0.4);
+    font-family:'Orbitron',sans-serif;
+    font-size:13px;
+    letter-spacing:1px;
+    color:#7ee7ff;
+    z-index:9999;
+">
+     <p>📘 Facebook: <a href="#" style="color:#29b6f6;">facebook.com/songchitienquan</a></p>
+    <p>📞 Phone number: 0123 456 789</p>
+    <p>📧 Email: songchitienquan@gmail.com</p>
+    <p>📍 Address: 227 Nguyen Van Cu Street</p>
+</footer>
+
+
+</body>
+</html>
