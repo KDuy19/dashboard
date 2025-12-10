@@ -27,8 +27,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide")
-
 components.html(html_code.replace("</body>", """
 <script>
     const root = window.parent.document.querySelector("#app");
@@ -39,6 +37,7 @@ components.html(html_code.replace("</body>", """
 </body>
 """), height=900, scrolling=False)
 
+st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide")
 
 # -------------------------
 # FINBERT (pretrained)
