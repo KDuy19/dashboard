@@ -9,33 +9,43 @@ import requests
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# --------------------------
-# SET CONFIG FIRST !!!
-# --------------------------
-st.set_page_config(
-    page_title="Stock Dashboard by SongChiTienQuan",
-    layout="wide"
-)
+# ----------------------------------------------------
+# CONFIG
+# ----------------------------------------------------
+st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide")
 
-# --------------------------
-# Inject HTML HEADER only
-# --------------------------
-def inject_html_header():
+# ----------------------------------------------------
+# 1. LOAD FULL HTML BACKGROUND (HEADER + PANEL + FOOTER)
+# ----------------------------------------------------
+def load_background():
     with open("background.html", "r", encoding="utf-8") as f:
         html = f.read()
 
-    # Chỉ chèn 1 lần ở đầu trang, KHÔNG replace body, KHÔNG xoá DOM Streamlit
-    components.html(
-        html,
-        height=300,     # header cao bao nhiêu tuỳ bạn
-        scrolling=False
-    )
+    # full page UI
+    components.html(html, height=1100, scrolling=False)
 
-inject_html_header()
+load_background()
 
-# --------------------------
-# FINBERT loading 
-# --------------------------
+# ----------------------------------------------------
+# 2. MOVE STREAMLIT UI INTO <div id="app">
+# ----------------------------------------------------
+components.html("""
+<script>
+const interval = setInterval(() => {
+    const appPanel = window.parent.document.querySelector("#app");
+    const streamlitMain = window.parent.document.querySelector('[data-testid="stAppViewContainer"]');
+
+    if (appPanel && streamlitMain) {
+        appPanel.appendChild(streamlitMain);
+        clearInterval(interval);
+    }
+}, 300);
+</script>
+""", height=0)
+
+# ----------------------------------------------------
+# 3. FINBERT
+# ----------------------------------------------------
 @st.cache_resource
 def load_finbert():
     model_name = "yiyanghkust/finbert-tone"
@@ -59,9 +69,9 @@ def get_sentiment(text: str):
     except:
         return "neutral", 0.0
 
-# -------------------------
-# FETCH FUNCTIONS
-# -------------------------
+# ----------------------------------------------------
+# 4. FETCH STOCK DATA
+# ----------------------------------------------------
 @st.cache_data
 def fetch_stock_info(symbol: str):
     try:
@@ -103,9 +113,9 @@ def fetch_daily_price_history(symbol: str):
     except:
         return pd.DataFrame()
 
-# -------------------------
-# AUTO COMPLETE
-# -------------------------
+# ----------------------------------------------------
+# 5. SEARCH AUTOCOMPLETE
+# ----------------------------------------------------
 def search_wrapper(query, **kwargs):
     if not query or len(query.strip()) < 2:
         return []
@@ -124,9 +134,9 @@ def search_wrapper(query, **kwargs):
     except:
         return []
 
-# -------------------------
-# MARKET CAP
-# -------------------------
+# ----------------------------------------------------
+# 6. MARKET CAP FORMATTER
+# ----------------------------------------------------
 def format_market_cap(value, currency="USD"):
     try: value = float(value)
     except: return f"{currency} 0"
@@ -136,17 +146,17 @@ def format_market_cap(value, currency="USD"):
     if value >= 1e6: return f"{currency} {value/1e6:.2f}M"
     return f"{currency} {value:,.0f}"
 
-# -------------------------
-# RECOMMENDATION
-# -------------------------
+# ----------------------------------------------------
+# 7. RECOMMENDATION
+# ----------------------------------------------------
 def recommendation_from_sentiment(label, confidence):
     if label == "positive" and confidence >= 0.6: return "BUY"
     if label == "negative" and confidence >= 0.6: return "SELL"
     return "HOLD"
 
-# -------------------------
-# DASHBOARD UI
-# -------------------------
+# ----------------------------------------------------
+# 8. STREAMLIT DASHBOARD UI (INSIDE PANEL)
+# ----------------------------------------------------
 st.title("Stock Dashboard by SongChiTienQuan")
 
 if "selected_symbol" not in st.session_state:
@@ -183,7 +193,7 @@ else:
         st.subheader(f"Market Cap: {format_market_cap(market_cap, currency)}")
         st.caption(f"Raw Value: {market_cap:,}")
 
-        # Price Chart
+        # CHART
         history = fetch_daily_price_history(symbol)
         if not history.empty:
             df = history.rename_axis("Date").reset_index()
@@ -198,7 +208,7 @@ else:
             st.header("Daily Price Chart")
             st.plotly_chart(fig, use_container_width=True)
 
-        # Financial Statements
+        # FINANCIALS
         q_fin = fetch_quarterly_financials(symbol)
         a_fin = fetch_annual_financials(symbol)
         st.header("Financial Statements")
@@ -227,7 +237,7 @@ else:
                     use_container_width=True
                 )
 
-        # Sentiment
+        # FINBERT
         st.header("Financial Sentiment Analysis (FinBERT)")
         news_text = st.text_area("Text input:", height=180)
 
