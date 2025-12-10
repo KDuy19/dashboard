@@ -2,13 +2,43 @@ import altair as alt  # Graph
 from streamlit_searchbox import st_searchbox  # Search box
 import plotly.graph_objects as go  # Graph
 import streamlit as st  # Deploy web
+import streamlit.components.v1 as components
 import yfinance as yf  # Data collecting from Yahoo Finance
 import pandas as pd  # Table support
 import requests  #  autocomplete search API
 import torch #Sentiment predict
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+# Load custom HTML UI
+def load_ui():
+    with open("background.html", "r", encoding="utf-8") as f:
+        html_code = f.read()
+    components.html(html_code, height=900, scrolling=False)
+
+# Render the HTML background
+load_ui()
+
+st.markdown("""
+<style>
+#root, .block-container {
+    position: relative;
+    z-index: 999999; 
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide")
+
+components.html(html_code.replace("</body>", """
+<script>
+    const root = window.parent.document.querySelector("#app");
+    if (root) {
+        root.innerHTML = "";  // Clear placeholder
+    }
+</script>
+</body>
+"""), height=900, scrolling=False)
+
 
 # -------------------------
 # FINBERT (pretrained)
