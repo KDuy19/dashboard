@@ -1,0 +1,10 @@
+streamlit
+yfinance
+pandas
+altair
+plotly
+streamlit-option-menu
+streamlit-searchbox
+torch
+transformers
+requests
