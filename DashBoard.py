@@ -2,26 +2,11 @@ import altair as alt  # Graph
 from streamlit_searchbox import st_searchbox  # Search box
 import plotly.graph_objects as go  # Graph
 import streamlit as st  # Deploy web
-import requests
 import yfinance as yf  # Data collecting from Yahoo Finance
 import pandas as pd  # Table support
 import requests  #  autocomplete search API
 import torch #Sentiment predict
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
-# URL raw HTML trên GitHub
-HTML_URL = "https://raw.githubusercontent.com/KDuy19/dashboard/refs/heads/main/UI.html"
-
-# Tải HTML
-response = requests.get(HTML_URL)
-html_code = response.text
-
-# Nhúng vào Streamlit
-st.markdown(html_code, unsafe_allow_html=True)
-
-# Nội dung dashboard
-st.title("My Dashboard")
-st.write("Nội dung Streamlit hiển thị ở đây.")
 
 st.set_page_config(page_title="Stock Dashboard by SongChiTienQuan", layout="wide")
 
